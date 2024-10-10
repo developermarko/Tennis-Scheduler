@@ -21,14 +21,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install nbconvert
-        pip install notebook
-        pip install pandas
-        pip install sendgrid  # Add sendgrid package to send email
+        pip install -r requirements.txt  # Install from requirements.txt
 
     - name: Run Jupyter Notebook
       run: |
-        jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html
+        jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html || { echo 'Jupyter Notebook execution failed'; exit 1; }
       shell: bash
 
     - name: Send Email with SendGrid
@@ -37,4 +34,4 @@ jobs:
         SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
         SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
       run: |
-        python send_email.py
+        python send_email.py || { echo 'Email sending failed'; exit 1; }
