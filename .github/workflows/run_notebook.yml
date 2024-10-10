@@ -20,11 +20,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install jupyter nbconvert
-          pip install -r requirements.txt # Optional: If you have dependencies listed
+          # pip install -r requirements.txt Optional: If you have dependencies listed
 
       - name: Run the Jupyter Notebook
         run: |
-          jupyter nbconvert --to notebook --execute your_notebook.ipynb --output output_notebook.ipynb
+          jupyter nbconvert --to notebook --execute Hackney Tennis Auto Booking.ipynb --output output_notebook.ipynb
           
       - name: Email the output (using SendGrid)
         run: |
@@ -37,8 +37,8 @@ jobs:
           sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
           email_content = open('output_notebook.ipynb', 'r').read()
           message = Mail(
-              from_email='your_email@example.com',
-              to_emails='your_email@example.com',
+              from_email='markonisic1998@gmail.com',
+              to_emails='markonisic@gmail.com',
               subject='Jupyter Notebook Output',
               plain_text_content=email_content,
               html_content=email_content)
