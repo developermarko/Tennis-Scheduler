@@ -1,3 +1,8 @@
 selenium
 webdriver-manager
 prettytable
+ipython
+nbconvert
+notebook
+pandas
+sendgrid
