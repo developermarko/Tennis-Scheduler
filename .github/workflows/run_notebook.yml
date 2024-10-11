@@ -23,6 +23,23 @@ jobs:
       run: |
         pip install -r requirements.txt  # Install from requirements.txt
 
+    - name: Install Chrome dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libxss1 \
+          libappindicator3-1 \
+          libindicator7 \
+          fonts-liberation \
+          libatk-bridge2.0-0 \
+          libgtk-3-0 \
+          libx11-xcb1 \
+          libxcomposite1 \
+          libxrandr2 \
+          libgbm1 \
+          xdg-utils \
+          libnss3
+
     - name: Run Jupyter Notebook
       run: |
         jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html || { echo 'Jupyter Notebook execution failed'; exit 1; }
