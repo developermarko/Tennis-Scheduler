@@ -13,8 +13,8 @@ def send_email():
             print("Error: output.html not found!")
             return
 
-        # Read the HTML output file
-        with open('output.html', 'r') as f:
+        # Read the HTML output file with explicit UTF-8 encoding
+        with open('output.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
 
         if not html_content.strip():
