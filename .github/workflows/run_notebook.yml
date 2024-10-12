@@ -46,7 +46,7 @@ jobs:
       shell: bash
 
     - name: List output directory contents  # List files to confirm output.html is created
-    run: ls -la
+      run: ls -la
 
     - name: Send Email with SendGrid
       env:
