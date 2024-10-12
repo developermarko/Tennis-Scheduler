@@ -1,10 +1,9 @@
 name: Run Jupyter Notebook and Email Output
 
-# Schedule to run at 11:30 PM UTC every day and also allow manual trigger
 on:
   schedule:
-    - cron: '30 23 * * *'  # Runs at 11:30 PM UTC every day
-  workflow_dispatch:  # Allows manual triggering of the workflow
+    - cron: '30 23 * * *'
+  workflow_dispatch:
 
 jobs:
   run-notebook:
@@ -17,36 +16,26 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.8'  # Use Python 3.8
+        python-version: '3.8'
 
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt  # Install from requirements.txt
-
-    - name: Install Chrome dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          libxss1 \
-          libappindicator3-1 \
-          libindicator7 \
-          fonts-liberation \
-          libatk-bridge2.0-0 \
-          libgtk-3-0 \
-          libx11-xcb1 \
-          libxcomposite1 \
-          libxrandr2 \
-          libgbm1 \
-          xdg-utils \
-          libnss3
+        pip install nbconvert notebook pandas sendgrid selenium webdriver-manager prettytable
+      shell: bash
 
     - name: Run Jupyter Notebook
       run: |
-        jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html || { echo 'Jupyter Notebook execution failed'; exit 1; }
+        jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html
       shell: bash
 
-    - name: List output directory contents  # List files to confirm output.html is created
-      run: ls -la
+    - name: Check output.html content (for debugging)
+      run: |
+        cat output.html
+      shell: bash
+
+    - name: List files in current directory (debugging step)
+      run: ls -al
+      shell: bash
 
     - name: Send Email with SendGrid
       env:
@@ -54,4 +43,4 @@ jobs:
         SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
         SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
       run: |
-        python send_email.py || { echo 'Email sending failed'; exit 1; }
+        python send_email.py
