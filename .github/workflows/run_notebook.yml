@@ -1,46 +1,52 @@
 name: Run Jupyter Notebook and Email Output
 
+# Schedule to run at 11:30 PM UTC every day and also allow manual trigger
 on:
   schedule:
-    - cron: '30 23 * * *'
-  workflow_dispatch:
+    - cron: '30 23 * * *'  # Runs at 11:30 PM UTC every day
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
   run-notebook:
     runs-on: ubuntu-latest
 
     steps:
+    # Check out the code from the repo
     - name: Checkout repo
       uses: actions/checkout@v3
 
+    # Set up Python environment
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.8'
 
+    # Install dependencies from the requirements.txt file
     - name: Install dependencies
       run: |
-        pip install nbconvert notebook pandas sendgrid selenium webdriver-manager prettytable
-      shell: bash
+        pip install -r requirements.txt
 
+    # Run the Jupyter Notebook to generate the output HTML file
     - name: Run Jupyter Notebook
+      run: jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html
+      shell: bash
+
+    # Ensure that output.html exists before proceeding
+    - name: Confirm output.html exists
       run: |
-        jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html
-      shell: bash
+        if [ ! -f output.html ]; then
+          echo "output.html not found! Exiting."
+          exit 1
+        fi
 
-    - name: Check output.html content (for debugging)
-      run: |
-        cat output.html
-      shell: bash
+    # Optional: Print the content of output.html for debugging purposes
+    - name: Check output.html content
+      run: cat output.html
 
-    - name: List files in current directory (debugging step)
-      run: ls -al
-      shell: bash
-
+    # Send the email using SendGrid
     - name: Send Email with SendGrid
       env:
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
         SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
         SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
-      run: |
-        python send_email.py
+      run: python send_email.py
