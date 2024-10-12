@@ -45,6 +45,9 @@ jobs:
         jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html || { echo 'Jupyter Notebook execution failed'; exit 1; }
       shell: bash
 
+    - name: List output directory contents  # List files to confirm output.html is created
+    run: ls -la
+
     - name: Send Email with SendGrid
       env:
         SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
