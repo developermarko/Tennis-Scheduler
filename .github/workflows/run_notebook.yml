@@ -28,7 +28,7 @@ jobs:
 
     # Run the Jupyter Notebook to generate the output HTML file
     - name: Run Jupyter Notebook
-      run: jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output output.html
+      run: jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output converted_output.html
       shell: bash
 
     # Ensure that output.html exists before proceeding
