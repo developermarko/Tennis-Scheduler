@@ -3,7 +3,8 @@ name: Run Jupyter Notebook and Email Output
 # Schedule to run at 11:30 PM UTC every day and also allow manual trigger
 on:
   schedule:
-    - cron: '30 23 * * *'  # Runs at 11:30 PM UTC every day
+    - cron: '01 23 * * *'  # Runs at 11:01 PM UTC every day
+    - cron: '30 07 * * *'  # Runs at 7:30 AM UTC every day
   workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
