@@ -1,10 +1,12 @@
 name: Run Jupyter Notebook and Email Output
 
-# Schedule to run at 11:30 PM UTC every day and also allow manual trigger
 on:
+  # Schedule for the full report
   schedule:
-    - cron: '01 23 * * *'  # Runs at 11:01 PM UTC every day
-    - cron: '30 07 * * *'  # Runs at 7:30 AM UTC every day
+    - cron: '01 00 * * *'  # Runs at 11:01 PM UTC daily
+    - cron: '01 08 * * *'  # Runs at 7:30 AM UTC daily
+  # Schedule for hourly updates
+    - cron: '15 7-20 * * *'  # Runs hourly between 7 AM and 8 PM UTC
   workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
@@ -12,42 +14,76 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Check out the code from the repo
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      # Check out the code from the repo
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    # Set up Python environment
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.8'
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
 
-    # Install dependencies from the requirements.txt file
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
 
-    # Run the Jupyter Notebook to generate the output HTML file
-    - name: Run Jupyter Notebook
-      run: jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output converted_output.html
-      shell: bash
+      # Run the Jupyter Notebook
+      - name: Run Jupyter Notebook
+        run: jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output converted_output.html
+        shell: bash
 
-    # Ensure that output.html exists before proceeding
-    - name: Confirm output.html exists
-      run: |
-        if [ ! -f output.html ]; then
-          echo "output.html not found! Exiting."
-          exit 1
-        fi
+      # Ensure output.html exists for full report schedule
+      - name: Confirm output.html exists
+        run: |
+          if [ ! -f output.html ]; then
+            echo "output.html not found! Exiting."
+            exit 1
+          fi
 
-    # Optional: Print the content of output.html for debugging purposes
-    - name: Check output.html content
-      run: cat output.html
+      # Optional: Print the content of output.html for debugging
+      - name: Check output.html content
+        run: cat output.html
 
-    # Send the email using SendGrid
-    - name: Send Email with SendGrid
-      env:
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
-        SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
-      run: python send_email.py
+      # Send email for full availability report
+      - name: Send Full Report Email
+        if: ${{ github.event.schedule }} && (github.event.schedule == '01 00 * * *' || github.event.schedule == '01 08 * * *')
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
+          SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
+        run: python send_email.py
+
+  send-hourly-updates:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 7-20 * * *'  # Runs only on hourly update schedule
+
+    steps:
+      # Check out the repo
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      # Check for availability_updates.html and send an email if it exists
+      - name: Check and Send Updates Email
+        env:
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
+          SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
+        run: |
+          if [ -f "availability_updates.html" ]; then
+            echo "Updates found. Sending email."
+            python send_email.py
+          else
+            echo "No updates found. Skipping email."
