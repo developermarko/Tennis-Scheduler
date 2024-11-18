@@ -48,7 +48,7 @@ jobs:
 
       # Send email for full availability report
       - name: Send Full Report Email
-        if: ${{ github.event.schedule }} && (github.event.schedule == '01 00 * * *' || github.event.schedule == '01 08 * * *')
+        if: ${{ github.event_name == 'schedule' && (github.event.schedule == '01 23 * * *' || github.event.schedule == '30 07 * * *') || github.event_name == 'workflow_dispatch' }}
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
