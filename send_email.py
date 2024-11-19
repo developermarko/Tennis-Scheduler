@@ -23,7 +23,7 @@ def send_email(file_name, subject):
 
         # Create email content
         message = Mail(
-            from_email="Tennis Gods",
+            from_email=sender_email,
             to_emails=recipient_email,
             subject=subject,
             html_content=f"<pre>{file_content}</pre>"
