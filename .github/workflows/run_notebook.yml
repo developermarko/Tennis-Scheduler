@@ -57,7 +57,7 @@ jobs:
 
   send-hourly-updates:
     runs-on: ubuntu-latest
-    if: github.event.schedule == '0 7-20 * * *'  # Runs only on hourly update schedule
+    if: github.event.schedule == '15 7-20 * * *'  # Runs only on hourly update schedule
 
     steps:
       # Check out the repo
