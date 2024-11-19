@@ -87,3 +87,4 @@ jobs:
             python send_email.py
           else
             echo "No updates found. Skipping email."
+          fi
