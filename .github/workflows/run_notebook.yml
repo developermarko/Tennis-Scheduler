@@ -109,6 +109,10 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      # For checking if availability_updates file is created
+      - name: Debug File Listing
+        run: ls -al
+
       # Check for availability_updates.html and send an email if it exists
       - name: Check and Send Updates Email
         env:
@@ -121,3 +125,4 @@ jobs:
             python send_email.py
           else
             echo "No updates found. Skipping email."
+          fi
