@@ -6,7 +6,7 @@ on:
     - cron: '01 00 * * *'  # Runs at 11:01 PM UTC daily
     - cron: '01 08 * * *'  # Runs at 7:30 AM UTC daily
   # Schedule for hourly updates
-    - cron: '15 7-20 * * *'  # Runs hourly between 7 AM and 8 PM UTC
+    - cron: '15 7-00 * * *'  # Runs hourly between 7 AM and 12 AM UTC
   workflow_dispatch:  # Allows manual triggering of the workflow
 
 jobs:
@@ -33,6 +33,16 @@ jobs:
           key: park-data-cache
           restore-keys: |
             park-data-cache
+
+        # Print the content of the cached file
+      - name: Print park_data.json content
+        run: |
+          if [ -f park_data.json ]; then
+            echo "Cached park_data.json found:"
+            cat park_data.json
+          else
+            echo "No cached park_data.json found."
+          fi
 
       # Install dependencies
       - name: Install dependencies
