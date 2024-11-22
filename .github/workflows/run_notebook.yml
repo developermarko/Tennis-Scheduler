@@ -82,7 +82,6 @@ jobs:
 
       # Save the updated park_data.json to cache
       - name: Update cache
-        if: steps.cache-park-data.outputs.cache-hit != 'true'  # Save only if cache is missing
         uses: actions/cache@v3
         with:
           path: park_data.json
