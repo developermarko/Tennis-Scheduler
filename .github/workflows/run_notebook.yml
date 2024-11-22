@@ -80,6 +80,10 @@ jobs:
           path: park_data.json
           key: park-data-cache
 
+      # For checking if availability_updates file is created
+      - name: Debug File Listing
+        run: ls -al
+
       # Send email for full availability report
       - name: Send Full Report Email
         if: ${{ github.event_name == 'schedule' && (github.event.schedule == '01 23 * * *' || github.event.schedule == '30 07 * * *') || github.event_name == 'workflow_dispatch' }}
