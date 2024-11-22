@@ -68,6 +68,16 @@ jobs:
           jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output converted_output.html
         shell: bash
 
+      # Print the content of the cached file
+      - name: Print park_data.json content
+        run: |
+          if [ -f park_data.json ]; then
+            echo "Cached park_data.json found:"
+            cat park_data.json
+          else
+            echo "No cached park_data.json found."
+          fi
+
       # Ensure output.html exists for full report schedule
       - name: Confirm output.html exists
         run: |
