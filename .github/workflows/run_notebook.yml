@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # For checking if availability_updates file is created
+      - name: Debug File Listing
+        run: ls -al
+      
       # Check out the code from the repo
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -48,6 +52,10 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+
+      # For checking if availability_updates file is created
+      - name: Debug File Listing
+        run: ls -al
 
       # Run the Jupyter Notebook
       - name: Run Jupyter Notebook
