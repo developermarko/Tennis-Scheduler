@@ -22,6 +22,18 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      # Compute a hash for park_data.json to be cached
+      - name: Compute cache key for park_data.json
+        id: cache-key
+        run: |
+          if [ -f park_data.json ]; then
+            key_hash=$(sha256sum park_data.json | cut -d' ' -f1)
+          else
+            key_hash="no-file"
+          fi
+          echo "key=park-data-cache-${key_hash}" >> $GITHUB_ENV
+        shell: bash
+
       # Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -33,20 +45,10 @@ jobs:
         uses: actions/cache@v3
         id: cache-park-data
         with:
-          path: park_data.json  # Path to the file you want to cache
-          key: park-data-cache
+          path: park_data.json
+          key: ${{ env.key }}
           restore-keys: |
-            park-data-cache
-
-      # Print the content of the cached file
-      - name: Print park_data.json content
-        run: |
-          if [ -f park_data.json ]; then
-            echo "Cached park_data.json found:"
-            cat park_data.json
-          else
-            echo "No cached park_data.json found."
-          fi
+            park-data-cache-
 
       # Install dependencies
       - name: Install dependencies
@@ -68,16 +70,6 @@ jobs:
           jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output converted_output.html
         shell: bash
 
-      # Print the content of the cached file
-      - name: Print park_data.json content
-        run: |
-          if [ -f park_data.json ]; then
-            echo "Cached park_data.json found:"
-            cat park_data.json
-          else
-            echo "No cached park_data.json found."
-          fi
-
       # Ensure output.html exists for full report schedule
       - name: Confirm output.html exists
         run: |
@@ -86,16 +78,12 @@ jobs:
             exit 1
           fi
 
-      # Optional: Print the content of output.html for debugging
-      - name: Check output.html content
-        run: cat output.html
-
-      # Save the updated park_data.json to cache
-      - name: Update cache
+      # Save updated park_data.json to cache
+      - name: Save updated cache
         uses: actions/cache@v3
         with:
           path: park_data.json
-          key: park-data-cache
+          key: ${{ env.key }}
 
       # For checking if availability_updates file is created
       - name: Debug File Listing
@@ -115,34 +103,6 @@ jobs:
     if: github.event.schedule == '15 7-20 * * *'  # Runs only on hourly update schedule
 
     steps:
-      # Check out the repo
-      - name: Checkout repo
-        uses: actions/checkout@v3
-
-      # Restore cached park_data.json
-      - name: Restore cache
-        uses: actions/cache@v3
-        id: cache-park-data
-        with:
-          path: park_data.json
-          key: park-data-cache
-          restore-keys: |
-            park-data-cache
-
-      # Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
-
-      # Install dependencies
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-
-      # For checking if availability_updates file is created
-      - name: Debug File Listing
-        run: ls -al
 
       # Check for availability_updates.html and send an email if it exists
       - name: Check and Send Updates Email
