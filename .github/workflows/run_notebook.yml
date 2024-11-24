@@ -3,7 +3,7 @@ name: Run Jupyter Notebook and Email Output
 on:
   # Schedule for the full report
   schedule:
-    - cron: '01 00 * * *'  # Runs at 11:01 PM UTC daily
+    - cron: '01 00 * * *'  # Runs at 21:01 AM UTC daily
     - cron: '01 08 * * *'  # Runs at 7:30 AM UTC daily
   # Schedule for hourly updates
     - cron: '15 7-11 * * *'  # Runs hourly between 7 AM and 11 PM UTC
@@ -91,7 +91,7 @@ jobs:
 
       # Send email for full availability report
       - name: Send Full Report Email
-        if: ${{ github.event_name == 'schedule' && (github.event.schedule == '01 23 * * *' || github.event.schedule == '30 07 * * *') || github.event_name == 'workflow_dispatch' }}
+        if: ${{ github.event_name == 'schedule' && (github.event.schedule == '01 00 * * *' || github.event.schedule == '01 08 * * *') || github.event_name == 'workflow_dispatch' }}
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
@@ -100,7 +100,7 @@ jobs:
 
   send-hourly-updates:
     runs-on: ubuntu-latest
-    if: github.event.schedule == '15 7-20 * * *'  # Runs only on hourly update schedule
+    if: github.event.schedule == '15 7-11 * * *'  # Runs only on hourly update schedule
 
     steps:
 
