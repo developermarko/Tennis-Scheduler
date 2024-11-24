@@ -96,7 +96,7 @@ jobs:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
           SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
-        run: python send_email.py
+        run: python send_email_full_availability.py
 
   send-hourly-updates:
     runs-on: ubuntu-latest
@@ -113,7 +113,7 @@ jobs:
         run: |
           if [ -f "availability_updates.html" ]; then
             echo "Updates found. Sending email."
-            python send_email.py
+            python send_email_availability_updates.py
           else
             echo "No updates found. Skipping email."
           fi
