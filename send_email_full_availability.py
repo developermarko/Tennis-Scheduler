@@ -37,9 +37,4 @@ def send_email(file_name, subject):
         print(f"Error sending email: {e}")
 
 if __name__ == "__main__":
-    # Send availability updates, if any
-    if os.path.exists("availability_updates.html"):
-        send_email("availability_updates.html", "Hourly Hackney Tennis Availability Updates")
-    else:
-        # Fallback to send the default report
-        send_email("output.html", "Daily Full Hackney Tennis Availability Report")
+    send_email("output.html", "Daily Full Hackney Tennis Availability Report")
