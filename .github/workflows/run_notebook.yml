@@ -31,7 +31,7 @@ jobs:
           else
             key_hash="no-file"
           fi
-          echo "key=park-data-cache-${key_hash}" >> $GITHUB_ENV
+          echo "key=park-data-cache-${key_hash}-run-${{ github.run_number }}" >> $GITHUB_ENV
         shell: bash
 
       # Set up Python environment
