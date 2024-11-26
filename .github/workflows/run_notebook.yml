@@ -50,6 +50,16 @@ jobs:
           restore-keys: |
             park-data-cache-
 
+      # For debugging
+      - name: Print Contents of Updated park_data.json
+        run: |
+          if [ -f park_data.json ]; then
+            echo "Updated park_data.json:"
+            cat park_data.json
+          else
+            echo "No park_data.json found after notebook run!"
+          fi
+      
       # Install dependencies
       - name: Install dependencies
         run: |
@@ -76,6 +86,16 @@ jobs:
           if [ ! -f output.html ]; then
             echo "output.html not found! Exiting."
             exit 1
+          fi
+
+      # For debugging
+      - name: Print Contents of Updated park_data.json
+        run: |
+          if [ -f park_data.json ]; then
+            echo "Updated park_data.json:"
+            cat park_data.json
+          else
+            echo "No park_data.json found after notebook run!"
           fi
 
       # Save updated park_data.json to cache
