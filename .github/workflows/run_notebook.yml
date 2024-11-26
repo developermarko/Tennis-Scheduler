@@ -80,7 +80,7 @@ jobs:
           else
             echo "No previous park_data.json found; starting fresh."
           fi
-          jupyter nbconvert --to html --execute hackney_tennis_auto_booking.ipynb --output converted_output.html
+          jupyter nbconvert --to notebook --execute hackney_tennis_auto_booking.ipynb --output result.ipynb --ExecutePreprocessor.timeout=600 --stdout
         shell: bash
 
       # Ensure output.html exists for full report schedule
