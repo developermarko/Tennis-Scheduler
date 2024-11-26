@@ -50,6 +50,9 @@ jobs:
           restore-keys: |
             park-data-cache-
 
+      - name: print park_data for debugging
+        run: cat park_data.json
+
       # For debugging
       - name: Print Contents of Updated park_data.json
         run: |
@@ -87,6 +90,10 @@ jobs:
             echo "output.html not found! Exiting."
             exit 1
           fi
+
+      # Really double checking debugging
+      - name: print park_data for debugging
+        run: cat park_data.json
 
       # For debugging
       - name: Print Contents of Updated park_data.json
