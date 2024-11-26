@@ -120,7 +120,7 @@ jobs:
 
   send-hourly-updates:
     runs-on: ubuntu-latest
-    if: github.event.schedule == '15 7-11 * * *'  # Runs only on hourly update schedule
+    if: github.event.schedule == '15 7-23 * * *'  # Runs only on hourly update schedule
 
     steps:
 
