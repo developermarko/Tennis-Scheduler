@@ -3,8 +3,8 @@ name: Run Jupyter Notebook and Email Output
 on:
   # Schedule for the full report
   schedule:
-    - cron: '01 00 * * *'  # Runs at 21:01 AM UTC daily
-    - cron: '01 08 * * *'  # Runs at 7:30 AM UTC daily
+    - cron: '01 00 * * *'  # Runs at 00:01 AM UTC daily
+    - cron: '01 08 * * *'  # Runs at 08:01 AM UTC daily
   # Schedule for hourly updates
     - cron: '15 7-23 * * *'  # Runs hourly between 7 AM and 11 PM UTC
   workflow_dispatch:  # Allows manual triggering of the workflow
@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # For checking if availability_updates file is created
+      # For checking initial file state
       - name: Debug File Listing
         run: ls -al
-      
+
       # Check out the code from the repo
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -50,27 +50,20 @@ jobs:
           restore-keys: |
             park-data-cache-
 
-      - name: print park_data for debugging
-        run: cat park_data.json
-
-      # For debugging
-      - name: Print Contents of Updated park_data.json
+      # Debug park_data.json before running notebook
+      - name: Print park_data.json content (before)
         run: |
           if [ -f park_data.json ]; then
-            echo "Updated park_data.json:"
+            echo "Loaded park_data.json:"
             cat park_data.json
           else
-            echo "No park_data.json found after notebook run!"
+            echo "No park_data.json found."
           fi
-      
+
       # Install dependencies
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-
-      # For checking if availability_updates file is created
-      - name: Debug File Listing
-        run: ls -al
 
       # Run the Jupyter Notebook
       - name: Run Jupyter Notebook
@@ -83,20 +76,8 @@ jobs:
           jupyter nbconvert --to notebook --execute hackney_tennis_auto_booking.ipynb --output result.ipynb --ExecutePreprocessor.timeout=600 --stdout
         shell: bash
 
-      # Ensure output.html exists for full report schedule
-      - name: Confirm output.html exists
-        run: |
-          if [ ! -f output.html ]; then
-            echo "output.html not found! Exiting."
-            exit 1
-          fi
-
-      # Really double checking debugging
-      - name: print park_data for debugging
-        run: cat park_data.json
-
-      # For debugging
-      - name: Print Contents of Updated park_data.json
+      # Debug park_data.json after running notebook
+      - name: Print park_data.json content (after)
         run: |
           if [ -f park_data.json ]; then
             echo "Updated park_data.json:"
@@ -112,35 +93,29 @@ jobs:
           path: park_data.json
           key: ${{ env.key }}
 
-      # For checking if availability_updates file is created
+      # Debug File Listing after notebook execution
       - name: Debug File Listing
         run: ls -al
 
-      # Send email for full availability report
-      - name: Send Full Report Email
-        if: ${{ github.event_name == 'schedule' && (github.event.schedule == '01 00 * * *' || github.event.schedule == '01 08 * * *') || github.event_name == 'workflow_dispatch' }}
-        env:
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
-          SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
-        run: python send_email_full_availability.py
-
-  send-hourly-updates:
-    runs-on: ubuntu-latest
-    if: github.event.schedule == '15 7-23 * * *'  # Runs only on hourly update schedule
-
-    steps:
-
-      # Check for availability_updates.html and send an email if it exists
-      - name: Check and Send Updates Email
+      # Send Email Logic
+      - name: Determine and Send Email
         env:
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           SENDGRID_SENDER_EMAIL: ${{ secrets.SENDGRID_SENDER_EMAIL }}
           SENDGRID_RECIPIENT_EMAIL: ${{ secrets.SENDGRID_RECIPIENT_EMAIL }}
         run: |
+          # Send hourly updates email if applicable
           if [ -f "availability_updates.html" ]; then
-            echo "Updates found. Sending email."
-            python send_email_availability_updates.py
+            if [[ "${{ github.event_name }}" == "schedule" && "${{ github.event.schedule }}" =~ "15 7-23" ]]; then
+              echo "Hourly update with availability updates found. Sending email."
+              python send_email_availability_updates.py
+            fi
           else
-            echo "No updates found. Skipping email."
+            echo "No availability updates found for hourly updates."
+          fi
+
+          # Send full availability email on the full report schedule
+          if [[ "${{ github.event_name }}" == "schedule" && ("${{ github.event.schedule }}" == "01 00 * * *" || "${{ github.event.schedule }}" == "01 08 * * *") ]]; then
+            echo "Full report schedule. Sending full report email."
+            python send_email_full_availability.py
           fi
