@@ -65,8 +65,8 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # Run the Jupyter Notebook
-      - name: Run Jupyter Notebook
+      # Run Python script
+      - name: Run Python Script
         run: |
           if [ -f park_data.json ]; then
             echo "Previous park_data.json found and will be used."
@@ -115,7 +115,7 @@ jobs:
           fi
 
           # Send full availability email on the full report schedule
-          if [[ "${{ github.event_name }}" == "schedule" && ("${{ github.event.schedule }}" == "01 00 * * *" || "${{ github.event.schedule }}" == "01 08 * * *") ]]; then
+          if [[ "${{ github.event_name }}" == "schedule" && ("${{ github.event.schedule }}" == "01 00 * * *" || "${{ github.event.schedule }}" == "01 08 * * *") ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             echo "Full report schedule. Sending full report email."
             python send_email_full_availability.py
           fi
