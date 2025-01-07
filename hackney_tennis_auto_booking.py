@@ -148,11 +148,93 @@ def load_and_compare_slots(file_path, live_data):
 
     return new_slots
 
+# Load the desired availability JSON to show filtered availability based on your exact preferences, not just all updates
+with open("desired_availability.json", "r") as file:
+    desired_availability = json.load(file)["desired_availability"]
+
+# Helper function to check if a slot matches any of the desired availability criteria, only used for filtered availability updates, not all availability updates
+def matches_desired_availability(location, date, slot, desired_availability):
+    """
+    Checks if a slot matches any of the desired availability criteria.
+    
+    Parameters:
+        location (str): The park or location name.
+        date (str): The date of the slot (in 'YYYY-MM-DD' format).
+        slot (str): The time slot string from the availability data.
+        desired_availability (list): List of dictionaries specifying desired availability.
+    
+    Returns:
+        bool: True if the slot matches any of the desired availability, False otherwise.
+    """
+    time, _, _ = extract_time_cost_and_url(slot)  # Extract time from slot text
+    day_of_week = datetime.strptime(date, '%Y-%m-%d').strftime('%A')  # Get day of the week
+    for item in desired_availability:
+        if (item["park"] == location and
+            item["day_of_week"] == day_of_week and
+            item["time"] == time):
+            return True
+    return False
+
+
+#Function to load and compare slots for updated availability WITH FILTERS, so you either call this function or the one above with no _with_filter at the end, if you want general availability updates
+def load_and_compare_slots_with_filter(file_path, live_data, desired_availability):
+    """
+    Loads saved booking slots, compares them with live booking slots, 
+    and filters by desired availability.
+    
+    Parameters:
+        file_path (str): Path to the JSON file storing the previous booking slots.
+        live_data (dict): Live booking slots data fetched from the website.
+        desired_availability (list): List of dictionaries specifying desired availability.
+    
+    Returns:
+        dict: Dictionary containing new booking slots that match the desired availability.
+    """
+    try:
+        # Load the previously saved slots from the file
+        with open(file_path, 'r') as file:
+            saved_data = json.load(file)
+    except FileNotFoundError:
+        # If the file doesn't exist, assume there are no saved slots
+        saved_data = {}
+
+    # Compare live data with saved data and filter by desired availability
+    new_slots = {}
+    for location, dates in live_data.items():
+        new_slots[location] = {}
+        for date, slots in dates.items():
+            # If the date exists in saved data, find new slots
+            if location in saved_data and date in saved_data[location]:
+                filtered_slots = [
+                    slot for slot in slots
+                    if slot not in saved_data[location][date] and
+                       matches_desired_availability(location, date, slot, desired_availability)  # **Filter slots**
+                ]
+                if filtered_slots:
+                    new_slots[location][date] = filtered_slots
+            else:
+                # If the location or date doesn't exist in saved data, filter all slots
+                filtered_slots = [
+                    slot for slot in slots
+                    if matches_desired_availability(location, date, slot, desired_availability)  # **Filter slots**
+                ]
+                if filtered_slots:
+                    new_slots[location][date] = filtered_slots
+
+    # Remove empty entries (no new slots for a location/date)
+    new_slots = {
+        location: {date: slots for date, slots in dates.items() if slots}
+        for location, dates in new_slots.items()
+        if any(dates.values())
+    }
+
+    return new_slots
+
 # Output the updated availability with comparison if previous file exists to compare to, otherwise the avalability updates will just be an  empty dictionary
 # And everything will be new
-
+# If you want unfiltered, general hourly updates, then instead of calling load_and_compare_slots_with_filter, call without the "_with_filter" at the end
 if os.path.exists("park_data.json"): 
-    availability_updates = load_and_compare_slots("park_data.json",park_data)
+    availability_updates = load_and_compare_slots_with_filter("park_data.json", park_data, desired_availability)
 else:
     availability_updates = {}
     
