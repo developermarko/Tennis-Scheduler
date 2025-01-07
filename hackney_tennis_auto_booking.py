@@ -150,31 +150,18 @@ def load_and_compare_slots(file_path, live_data):
 
 # Load the desired availability JSON to show filtered availability based on your exact preferences, not just all updates
 with open("desired_availability.json", "r") as file:
-    desired_availability = json.load(file)["desired_availability"]
+    desired_availability = json.load(file)
 
 # Helper function to check if a slot matches any of the desired availability criteria, only used for filtered availability updates, not all availability updates
-def matches_desired_availability(location, date, slot, desired_availability):
-    """
-    Checks if a slot matches any of the desired availability criteria.
-    
-    Parameters:
-        location (str): The park or location name.
-        date (str): The date of the slot (in 'YYYY-MM-DD' format).
-        slot (str): The time slot string from the availability data.
-        desired_availability (list): List of dictionaries specifying desired availability.
-    
-    Returns:
-        bool: True if the slot matches any of the desired availability, False otherwise.
-    """
-    time, _, _ = extract_time_cost_and_url(slot)  # Extract time from slot text
-    day_of_week = datetime.strptime(date, '%Y-%m-%d').strftime('%A')  # Get day of the week
-    for item in desired_availability:
-        if (item["park"] == location and
-            item["day_of_week"] == day_of_week and
-            item["time"] == time):
-            return True
+def matches_desired_availability(location, day_of_week, time, desired_availability):
+    # Check if the park exists in the data
+    if location in desired_availability:
+        # Check if the day exists for this park
+        if day_of_week in desired_availability[location]:
+            # Check if the time is available
+            if time in desired_availability[location][day_of_week]:
+                return True
     return False
-
 
 #Function to load and compare slots for updated availability WITH FILTERS, so you either call this function or the one above with no _with_filter at the end, if you want general availability updates
 def load_and_compare_slots_with_filter(file_path, live_data, desired_availability):
