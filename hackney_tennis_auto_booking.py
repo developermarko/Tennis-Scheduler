@@ -192,10 +192,12 @@ def load_and_compare_slots_with_filter(file_path, live_data, desired_availabilit
         for date, slots in dates.items():
             # If the date exists in saved data, find new slots
             if location in saved_data and date in saved_data[location]:
+                date_obj = datetime.strptime(date, "%Y-%m-%d")
+                time, _, _ = extract_time_cost_and_url(slot)
                 filtered_slots = [
                     slot for slot in slots
                     if slot not in saved_data[location][date] and
-                       matches_desired_availability(location, date, slot, desired_availability)  # **Filter slots**
+                       matches_desired_availability(location, f'{date_obj.strftime("%A")}', time, desired_availability)  # **Filter slots**
                 ]
                 if filtered_slots:
                     new_slots[location][date] = filtered_slots
@@ -203,7 +205,7 @@ def load_and_compare_slots_with_filter(file_path, live_data, desired_availabilit
                 # If the location or date doesn't exist in saved data, filter all slots
                 filtered_slots = [
                     slot for slot in slots
-                    if matches_desired_availability(location, date, slot, desired_availability)  # **Filter slots**
+                    if matches_desired_availability(location, f'{date_obj.strftime("%A")}', time, desired_availability)  # **Filter slots**
                 ]
                 if filtered_slots:
                     new_slots[location][date] = filtered_slots
@@ -216,7 +218,6 @@ def load_and_compare_slots_with_filter(file_path, live_data, desired_availabilit
     }
 
     return new_slots
-
 # Output the updated availability with comparison if previous file exists to compare to, otherwise the avalability updates will just be an  empty dictionary
 # And everything will be new
 # If you want unfiltered, general hourly updates, then instead of calling load_and_compare_slots_with_filter, call without the "_with_filter" at the end
