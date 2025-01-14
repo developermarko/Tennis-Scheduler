@@ -47,7 +47,12 @@ try:
         
         for day in range(7):  # Iterate from today (0) to the next 6 days (6)
             # Get the date for today and the next 6 days
-            date_str = get_future_date(day) #for input in the URL and eventually output html
+            # Need to add if statement to check if it's past 8PM currently to start checking for tomorrow onward, as it sometimes sends slots from earlier in the day, seems to be after 8PM
+            if datetime.today().strftime('%H:%M') > '20:00':
+                date_str = get_future_date(day+1) #for input in the URL and eventually output html
+            else:
+                date_str = get_future_date(day) #for input in the URL and eventually output html
+                
             url = f"https://clubspark.lta.org.uk/{park}/Booking/BookByDate#?date={date_str}&role=guest"
             driver.get(url)
             time.sleep(1)
