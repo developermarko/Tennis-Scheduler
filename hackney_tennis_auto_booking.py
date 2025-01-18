@@ -207,6 +207,7 @@ def load_and_compare_slots_with_filter(file_path, live_data, desired_availabilit
                     new_slots[location][date] = filtered_slots
             else:
                 # If the location or date doesn't exist in saved data, filter all slots
+                date_obj = datetime.strptime(date, "%Y-%m-%d")
                 filtered_slots = [
                     slot for slot in slots
                     if matches_desired_availability(location, f'{date_obj.strftime("%A")}', extract_time_cost_and_url(slot)[0], desired_availability)  # **Filter slots incl. extract time from the slot**
